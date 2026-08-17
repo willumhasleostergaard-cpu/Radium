@@ -1,0 +1,568 @@
+ ```html
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radium AI</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #212121;
+    color: white;
+    height: 100vh;
+    display: flex;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 250px;
+    background: #171717;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    padding: 12px;
+    margin-bottom: 15px;
+}
+
+.new-chat {
+    width: 100%;
+    padding: 12px;
+    background: #2f2f2f;
+    color: white;
+    border: 1px solid #444;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: left;
+    font-size: 15px;
+}
+
+.new-chat:hover {
+    background: #3a3a3a;
+}
+
+.sidebar-bottom {
+    margin-top: auto;
+    color: #999;
+    padding: 12px;
+}
+
+/* MAIN */
+.main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.topbar {
+    height: 60px;
+    border-bottom: 1px solid #333;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    font-weight: bold;
+}
+
+.messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 30px 20px;
+}
+
+.welcome {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.welcome h1 {
+    margin: 0;
+    font-size: 38px;
+}
+
+.welcome p {
+    color: #999;
+}
+
+/* MESSAGES */
+.message {
+    max-width: 850px;
+    margin: 0 auto 20px;
+    line-height: 1.6;
+}
+
+.user {
+    background: #2f2f2f;
+    padding: 14px 18px;
+    border-radius: 14px;
+}
+
+.assistant {
+    padding: 10px;
+}
+
+.message-image {
+    max-width: 350px;
+    max-height: 350px;
+    border-radius: 14px;
+    display: block;
+}
+
+/* INPUT */
+.input-area {
+    padding: 15px 20px 25px;
+}
+
+.input-box {
+    max-width: 900px;
+    margin: auto;
+    background: #2f2f2f;
+    border: 1px solid #444;
+    border-radius: 18px;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+textarea {
+    flex: 1;
+    height: 45px;
+    resize: none;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: white;
+    font-size: 16px;
+    padding: 10px;
+}
+
+.icon-button {
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: #aaa;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.icon-button:hover {
+    background: #444;
+    color: white;
+}
+
+.send-button {
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: 10px;
+    background: white;
+    color: black;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.send-button:hover {
+    background: #ddd;
+}
+
+/* HIDDEN FILE INPUT */
+#imageInput {
+    display: none;
+}
+
+/* MOBILE */
+@media (max-width: 700px) {
+    .sidebar {
+        display: none;
+    }
+
+    .welcome h1 {
+        font-size: 30px;
+        text-align: center;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+
+<aside class="sidebar">
+
+    <div class="logo">
+        ⚛️ Radium
+    </div>
+
+    <button class="new-chat" onclick="newChat()">
+        ＋ Ny chat
+    </button>
+
+    <div class="sidebar-bottom">
+        ⚙️ Indstillinger
+    </div>
+
+</aside>
+
+
+<!-- MAIN -->
+
+<main class="main">
+
+    <header class="topbar">
+        Radium
+    </header>
+
+
+    <section class="messages" id="messages">
+
+        <div class="welcome" id="welcome">
+
+            <h1>Hvad kan jeg hjælpe med?</h1>
+
+            <p>Velkommen til Radium AI.</p>
+
+        </div>
+
+    </section>
+
+
+    <!-- INPUT -->
+
+    <div class="input-area">
+
+        <div class="input-box">
+
+            <!-- IMAGE UPLOAD -->
+
+            <label
+                for="imageInput"
+                class="icon-button"
+                title="Upload billede">
+
+                📷
+
+            </label>
+
+            <input
+                id="imageInput"
+                type="file"
+                accept="image/*"
+            >
+
+
+            <!-- TEXT -->
+
+            <textarea
+                id="messageInput"
+                placeholder="Skriv en besked..."
+            ></textarea>
+
+
+            <!-- VOICE -->
+
+            <button
+                class="icon-button"
+                id="voiceButton"
+                title="Voice">
+
+                🎙️
+
+            </button>
+
+
+            <!-- SEND -->
+
+            <button
+                class="send-button"
+                id="sendButton">
+
+                ↑
+
+            </button>
+
+        </div>
+
+    </div>
+
+</main>
+
+
+<script>
+
+/* ELEMENTS */
+
+const messages = document.getElementById("messages");
+
+const input =
+    document.getElementById("messageInput");
+
+const sendButton =
+    document.getElementById("sendButton");
+
+const imageInput =
+    document.getElementById("imageInput");
+
+const voiceButton =
+    document.getElementById("voiceButton");
+
+
+/* REMOVE WELCOME */
+
+function removeWelcome() {
+
+    const welcome =
+        document.getElementById("welcome");
+
+    if (welcome) {
+        welcome.remove();
+    }
+
+}
+
+
+/* SEND MESSAGE */
+
+function sendMessage() {
+
+    const text =
+        input.value.trim();
+
+    if (!text) return;
+
+    removeWelcome();
+
+
+    /* USER */
+
+    const userMessage =
+        document.createElement("div");
+
+    userMessage.className =
+        "message user";
+
+    userMessage.textContent =
+        text;
+
+    messages.appendChild(userMessage);
+
+
+    input.value = "";
+
+
+    /* AI */
+
+    const aiMessage =
+        document.createElement("div");
+
+    aiMessage.className =
+        "message assistant";
+
+    messages.appendChild(aiMessage);
+
+
+    /* TEST RESPONSE */
+
+    const response =
+        "Hej! Jeg er Radium 🤖 " +
+        "Dette svar bliver streamet " +
+        "bogstav for bogstav.";
+
+    let index = 0;
+
+
+    const timer =
+        setInterval(() => {
+
+            aiMessage.textContent +=
+                response[index];
+
+            index++;
+
+            messages.scrollTop =
+                messages.scrollHeight;
+
+
+            if (index >= response.length) {
+
+                clearInterval(timer);
+
+            }
+
+        }, 35);
+
+}
+
+
+/* SEND BUTTON */
+
+sendButton.addEventListener(
+    "click",
+    sendMessage
+);
+
+
+/* ENTER */
+
+input.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key === "Enter" &&
+            !event.shiftKey
+        ) {
+
+            event.preventDefault();
+
+            sendMessage();
+
+        }
+
+    }
+);
+
+
+/* IMAGE */
+
+imageInput.addEventListener(
+    "change",
+    function() {
+
+        const file =
+            imageInput.files[0];
+
+        if (!file) return;
+
+        removeWelcome();
+
+
+        const message =
+            document.createElement("div");
+
+        message.className =
+            "message user";
+
+
+        const image =
+            document.createElement("img");
+
+        image.className =
+            "message-image";
+
+        image.src =
+            URL.createObjectURL(file);
+
+
+        message.appendChild(image);
+
+        messages.appendChild(message);
+
+
+        messages.scrollTop =
+            messages.scrollHeight;
+
+
+        imageInput.value = "";
+
+    }
+);
+
+
+/* NEW CHAT */
+
+function newChat() {
+
+    messages.innerHTML = `
+
+        <div
+            class="welcome"
+            id="welcome">
+
+            <h1>
+                Hvad kan jeg hjælpe med?
+            </h1>
+
+            <p>
+                Velkommen til Radium AI.
+            </p>
+
+        </div>
+
+    `;
+
+}
+
+
+/* VOICE */
+
+voiceButton.addEventListener(
+    "click",
+    function() {
+
+        if (
+            !(
+                "webkitSpeechRecognition"
+                in window
+            )
+        ) {
+
+            alert(
+                "Voice understøttes ikke " +
+                "af denne browser."
+            );
+
+            return;
+
+        }
+
+
+        const recognition =
+            new webkitSpeechRecognition();
+
+
+        recognition.lang =
+            "da-DK";
+
+
+        recognition.start();
+
+
+        recognition.onresult =
+            function(event) {
+
+                input.value =
+                    event.results[0][0]
+                    .transcript;
+
+            };
+
+    }
+);
+
+</script>
+
+</body>
+</html>
+```
